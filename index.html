@@ -2,8 +2,9 @@
 
 <head>
     <title>Todo list</title>
-    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:300,400,700,900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Work+Sans:300,400,700,900&display=swap" rel="stylesheet" />
     <link href="main.css" rel="stylesheet" />
+    <script defer src="script.js"></script>
 </head>
 
 <body>
@@ -13,14 +14,12 @@
         <h2 class="task-list-title">
             My lists
         </h2>
-        <ul class="task-list">
-            <li class="list-name active-list">YouTube</li>
-            <li class="list-name">Work</li>
-            <li class="list-name">Grocery</li>
+        <ul class="task-list" data-lists>
         </ul>
 
-        <form action="">
-            <input type="text" name="" id="" class="new list" placeholder="new list name" aria-label="new list name" />
+        <form action="" data-new-list-form>
+            <input type="text" name="" id="" class="new list" placeholder="new list name" aria-label="new list name"
+                data-new-list-input />
 
             <button class="btn create" aria-label="create new list">
                 +
@@ -28,59 +27,46 @@
         </form>
     </div>
 
-    <div class="todo-list">
+    <div class="todo-list" data-list-container>
         <div class="todo-header">
-            <h2 class="list-title">YouTube</h2>
-            <p class="task-count">3 tasks remaining</p>
+            <h2 class="list-title" data-list-title></h2>
+            <p class="task-count" data-list-count></p>
         </div>
 
         <div class="todo-body">
-            <div class="tasks">
-                <div class="task">
-                    <input type="checkbox" name="" id="task-1" />
-                    <label for="task-1">
-                        <span class="custom-checkbox"></span>
-                        record todo list video
-                    </label>
+            <div class="tasks-container">
+                <div class="tasks" data-list-tasks>
                 </div>
+                <div class="new-task-creator">
 
-                <div class="task">
-                    <input type="checkbox" name="" id="task-2" />
-                    <label for="task-2">
-                        <span class="custom-checkbox"></span>
-                        another task
-                    </label>
+                    <form action="" data-new-task-form>
+                        <input type="text" name="" id="" class="new task" placeholder="new task name"
+                            aria-label="new task name" data-new-task-input />
+
+                        <button class="btn create" aria-label="create new task">
+                            +
+                        </button>
+                    </form>
                 </div>
-
-                <div class="task">
-                    <input type="checkbox" name="" id="task-3" />
-                    <label for="task-3">
-                        <span class="custom-checkbox"></span>
-                        a third task
-                    </label>
-                </div>
-            </div>
-            <div class="new-task-creator">
-
-                <form action="">
-                    <input type="text" name="" id="" class="new task" placeholder="new task name"
-                        aria-label="new task name" />
-
-                    <button class="btn create" aria-label="create new task">
-                        +
-                    </button>
-                </form>
             </div>
             <div class="delete-stuff">
-                <button class="btn delete">
+                <button class="btn delete" data-clear-completed-tasks>
                     Clear completed tasks
                 </button>
-                <button class="btn delete">
+                <button class="btn delete" data-delete-list-button>
                     Delete list
                 </button>
             </div>
         </div>
     </div>
+    <template id="task-template">
+        <div class="task">
+            <input type="checkbox" name="" />
+            <label>
+                <span class="custom-checkbox"></span>
+            </label>
+        </div>
+    </template>
 </body>
 
 </html>

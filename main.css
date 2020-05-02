@@ -133,8 +133,6 @@ form {
     --spacer: 2rem;
 
     grid-area: active;
-    background: var(--clr-light);
-    color: var(--clr-dark);
 }
 
 .todo-header {
@@ -143,6 +141,7 @@ form {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    color: var(--clr-dark);
 }
 
 .list-title {
@@ -157,6 +156,8 @@ form {
 .todo-body {
     padding: var(--spacer);
     position: relative;
+    background: var(--clr-light);
+    color: var(--clr-dark);
 }
 
 [type="checkbox"] {
