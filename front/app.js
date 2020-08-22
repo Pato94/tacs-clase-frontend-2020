@@ -17,22 +17,14 @@ class App extends React.Component {
     }
 
     componentDidMount() {
-        console.log('mounted')
         socket.on('list_updated', list => {
-            console.log(list)
-            const lists = replaceInList(this.state.lists, list)
-            this.setState({ lists })
-            this.updateLocalStorage()
+            this.updateList(list, false)
         })
         socket.on('list_created', list => {
-            console.log(list)
-            this.setState({ lists: [...this.state.lists, list] })
-            this.updateLocalStorage()
+            this.addList(list, false)
         })
         socket.on('list_deleted', event => {
-            const removedId = event.id
-            this.setState({ lists: this.state.lists.filter(({ id }) => id !== removedId) });
-            this.updateLocalStorage();
+            this.deleteList(event.id, false)
         })
     }
 
@@ -45,29 +37,17 @@ class App extends React.Component {
         return this.state.lists.find(({ id }) => id === this.state.selectedListId)
     }
 
-    addList(list) {
-        socket.emit('list_created', list)
-        this.setState({ lists: [...this.state.lists, list] })
-        this.updateLocalStorage()
-    }
-
     addTask(task) {
         const list = this.selectedList()
         const newList = { ...list, tasks: [...list.tasks, task] }
-        socket.emit('list_updated', newList)
-        const lists = replaceInList(this.state.lists, newList)
-        this.setState({ lists })
-        this.updateLocalStorage()
+        this.updateList(newList, true)
     }
 
     toggleTask(task) {
         const list = this.selectedList()
         const newTasks = replaceInList(list.tasks, { ...task, completed: !task.completed })
         const newList = { ...list, tasks: newTasks }
-        socket.emit('list_updated', newList)
-        const newLists = replaceInList(this.state.lists, newList)
-        this.setState({ lists: newLists })
-        this.updateLocalStorage()
+        this.updateList(newList, true)
     }
 
     selectList(id) {
@@ -78,15 +58,35 @@ class App extends React.Component {
     clearCompletedTasks() {
         const list = this.selectedList();
         const newList = { ...list, tasks: list.tasks.filter(({ completed }) => !completed) };
-        socket.emit('list_updated', newList)
-        const newLists = replaceInList(this.state.lists, newList);
-        this.setState({ lists: newLists });
-        this.updateLocalStorage();
+        this.updateList(newList, true)
     }
 
-    deleteList() {
-        socket.emit('list_deleted', { id: this.state.selectedListId })
-        this.setState({ lists: this.state.lists.filter(({ id }) => id !== this.state.selectedListId) });
+    addList(list, emit) {
+        if (emit) {
+            socket.emit('list_created', list)
+        }
+        const newLists = [...this.state.lists, list]
+        this.updateLists(newLists)
+    }
+
+    updateList(newList, emit) {
+        if (emit) {
+            socket.emit('list_updated', newList)
+        }
+        const newLists = replaceInList(this.state.lists, newList);
+        this.updateLists(newLists)
+    }
+
+    deleteList(removedId, emit) {
+        if (emit) {
+            socket.emit('list_deleted', {id: removedId})
+        }
+        const newLists = this.state.lists.filter(({ id }) => id !== removedId)
+        this.updateLists(newLists)
+    }
+
+    updateLists(newLists) {
+        this.setState({ lists: newLists });
         this.updateLocalStorage();
     }
 
@@ -99,7 +99,7 @@ class App extends React.Component {
                 </h1>
                 <Lists
                     lists={this.state.lists}
-                    addList={list => this.addList(list)}
+                    addList={list => this.addList(list, true)}
                     selectedId={this.state.selectedListId}
                     selectList={id => this.selectList(id)} />
                 <Tasks
@@ -107,7 +107,7 @@ class App extends React.Component {
                     addTask={(task) => this.addTask(task)}
                     toggleTask={(task) => this.toggleTask(task)}
                     clearCompletedTasks={() => this.clearCompletedTasks()}
-                    deleteList={() => this.deleteList()} />
+                    deleteList={() => this.deleteList(this.state.selectedListId, true)} />
             </React.Fragment>
         )
     }
