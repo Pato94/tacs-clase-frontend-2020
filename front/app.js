@@ -8,10 +8,32 @@ const selectedListId = localStorage.getItem(LOCAL_STORAGE_SELECTED_LIST_KEY);
 
 const replaceInList = (list, item) => list.map(i => i.id === item.id ? item : i)
 
+const socket = io();
+
 class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = { lists, selectedListId }
+    }
+
+    componentDidMount() {
+        console.log('mounted')
+        socket.on('list_updated', list => {
+            console.log(list)
+            const lists = replaceInList(this.state.lists, list)
+            this.setState({ lists })
+            this.updateLocalStorage()
+        })
+        socket.on('list_created', list => {
+            console.log(list)
+            this.setState({ lists: [...this.state.lists, list] })
+            this.updateLocalStorage()
+        })
+        socket.on('list_deleted', event => {
+            const removedId = event.id
+            this.setState({ lists: this.state.lists.filter(({ id }) => id !== removedId) });
+            this.updateLocalStorage();
+        })
     }
 
     updateLocalStorage() {
@@ -24,13 +46,16 @@ class App extends React.Component {
     }
 
     addList(list) {
+        socket.emit('list_created', list)
         this.setState({ lists: [...this.state.lists, list] })
         this.updateLocalStorage()
     }
 
     addTask(task) {
         const list = this.selectedList()
-        const lists = replaceInList(this.state.lists, { ...list, tasks: [...list.tasks, task] })
+        const newList = { ...list, tasks: [...list.tasks, task] }
+        socket.emit('list_updated', newList)
+        const lists = replaceInList(this.state.lists, newList)
         this.setState({ lists })
         this.updateLocalStorage()
     }
@@ -38,7 +63,9 @@ class App extends React.Component {
     toggleTask(task) {
         const list = this.selectedList()
         const newTasks = replaceInList(list.tasks, { ...task, completed: !task.completed })
-        const newLists = replaceInList(this.state.lists, { ...list, tasks: newTasks })
+        const newList = { ...list, tasks: newTasks }
+        socket.emit('list_updated', newList)
+        const newLists = replaceInList(this.state.lists, newList)
         this.setState({ lists: newLists })
         this.updateLocalStorage()
     }
@@ -51,13 +78,15 @@ class App extends React.Component {
     clearCompletedTasks() {
         const list = this.selectedList();
         const newList = { ...list, tasks: list.tasks.filter(({ completed }) => !completed) };
+        socket.emit('list_updated', newList)
         const newLists = replaceInList(this.state.lists, newList);
         this.setState({ lists: newLists });
         this.updateLocalStorage();
     }
 
     deleteList() {
-        this.setState({ lists: this.state.lists.filter(({ id }) => id !== selectedListId) });
+        socket.emit('list_deleted', { id: this.state.selectedListId })
+        this.setState({ lists: this.state.lists.filter(({ id }) => id !== this.state.selectedListId) });
         this.updateLocalStorage();
     }
 
