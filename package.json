@@ -22,6 +22,6 @@
   "homepage": "https://github.com/Pato94/tacs-clase-frontend-2020#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.5.0"
   }
 }
